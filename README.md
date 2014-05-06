@@ -1,4 +1,4 @@
-# Custom Polymer element for geo based attraction discovery
+# Custom Polymer element for Geo Location based discovery
 
 Inspired by <a href="http://ebidel.github.io/geo-location/components/geo-location/" target="_blank">Eric Bidelman's geo-location</a>
 
