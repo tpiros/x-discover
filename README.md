@@ -11,4 +11,4 @@ Simply execute <code>bower install</code> from the project folder
 Add the custom <code>&lt;x-discover></code> tag to your HTML page (along with the necessary Polymer libraries).  Make sure that you run your index.html from a server (the easiest way if you're on a UNIX environment is to execute this Python command to enable an HTTP server fo the current directory: <code>python -m SimpleHTTPServer</code>) Also make sure that you allow the geo location to be detected by your browser.
 
 ## More info
-<a href="http://tamas.io/x-discover-another-polymer-element/">http://tamas.io/x-discover-another-polymer-element/</a>
+<a href="http://tamas.io/x-discover-geo-location-based-custom-polymer-element/">http://tamas.io/x-discover-geo-location-based-custom-polymer-element/</a>
