@@ -1,0 +1,106 @@
+<link rel="import" href="bower_components/polymer-jsonp/polymer-jsonp.html">
+<link rel="import" href="bower_components/core-ajax/core-ajax.html">
+<polymer-element name="x-discover" attributes="apikey latitude longitude">
+<template>
+    <style>
+    /*later*/
+    </style>
+
+    <polymer-jsonp id="location" on-polymer-response="{{getLocationName}}" url="http://query.yahooapis.com/v1/public/yql?q=select%20neighborhood,city,countrycode%20from%20geo.placefinder%20where%20text%3D%22{{latitude}}%2C{{longitude}}%22%20and%20gflags%3D%22R%22&format=json&callback="></polymer-jsonp>
+    <core-ajax id="poi" handleAs="json" on-core-response="{{getpoi}}" url="https://api.foursquare.com/v2/venues/explore?client_id={{clientid}}&client_secret={{clientsecret}}&v=20130815&ll={{latitude}},{{longitude}}&query=outdoor&limit=10&venuePhotos=1"></core-ajax>
+
+    <p>Hello - {{ location }}</p>
+        <template id="places" repeat="{{place in places}}">
+            <div class="place">
+                <p>{{place.venue.name}} <br>
+                    <img src="{{place.venue.photos.groups[0].items[0].prefix}}300x300{{place.venue.photos.groups[0].items[0].suffix}}"></p>
+            </div>
+        </template>
+</template>
+<script>
+var id_ = null; //watch position
+var init = true; //initial lat/long pair collection
+var distance = 0; //initial distance value
+Polymer('x-discover', {
+            latitude: null,
+            longitude: null,
+            location: 'Loading your location...',
+            neighborhood: '',
+            city: '',
+            country: '',
+            poi: 'Loading points of interests',
+            clientid: '',
+            clientsecret: '',
+            places: [],
+            watchPos: true,
+            ready: function() { //constantly watching position
+                navigator.geolocation.watchPosition(this.onPosition.bind(this));
+            },
+            watchPosChanged: function() {
+              if (id_) {
+                    navigator.geolocation.clearWatch(id_);
+                    id_ = null;
+                }
+                if (this.watchPos) {
+                  id_ = navigator.geolocation.watchPosition(this.onPosition.bind(this));
+                }
+            },
+            getLocationName: function(e, r) { //gets cityand countrycode
+                if (this.neighborhood !== r.response.query.results.Result.neighborhood) { //only collect POI when neighborhood changes
+                    this.$.poi.go();
+                }
+                this.neighborhood = r.response.query.results.Result.neighborhood;
+                this.city = r.response.query.results.Result.city;
+                this.country = r.response.query.results.Result.countrycode;
+                this.location = 'You are around: ' + this.neighborhood + ' - ' + this.city + ', ' + this.country;
+            },
+            onPosition: function(pos) { //gets current position
+                var radius = 6371; // Earth's radius in km
+                if (init) {
+                    this.latitude = pos.coords.latitude;
+                    this.longitude = pos.coords.longitude;
+                    this.$.location.go();
+                    init = false;
+                }
+
+                if (distance > 100) { //limit the querying
+                    this.latitude = pos.coords.latitude;
+                    this.longitude = pos.coords.longitude;
+                    this.$.location.go();
+                }
+                //calculate the distance using the haversine formula
+                var actualLatitude = pos.coords.latitude,//now
+                    storedLatitude = this.latitude, //stored
+                    actualLongitude = pos.coords.longitude, //now
+                    storedLongitude = this.longitude, //stored
+                    deltaLatitude = storedLatitude - actualLatitude, //distance between lats
+                    deltaLongitude = storedLongitude - actualLongitude, //distance between longs
+                    a = Math.sin(deltaLatitude/2) * Math.sin(deltaLatitude / 2) + Math.cos(actualLatitude) * Math.cos(storedLatitude) * Math.sin(deltaLongitude/2) * Math.sin(deltaLongitude/2),
+                    c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); //final formula
+
+                distance = radius * c; //distance between two points
+                distance = Number(distance.toFixed(0)); //distance trick with toFixed();
+
+                /*this.fire('update-test', {
+                    originLatitude: this.latitude,
+                    originLongitude: this.longitude,
+                    nowLatitude: actualLatitude,
+                    nowLongitude: actualLongitude,
+                    distance: distance
+                });*/
+
+                this.position = pos;
+                /*this.fire('geo-response', { //send this off to the FE only for testing really
+                    //latitude: this.latitude,
+                    //longitude: this.longitude,
+                    //position: pos
+              });*/
+            },
+            getpoi: function(e, r) {
+                this.$.places.model = this.places;
+                this.places = {places: r.response.response.groups[0].items};
+                this.$.places.model = {places: r.response.response.groups[0].items};
+            }
+        });
+</script>
+</polymer-element>

@@ -1,0 +1,27 @@
+{
+  "name": "x-discover",
+  "version": "0.0.1",
+  "authors": [
+    "Tamas Piros"
+  ],
+  "main": "index.html",
+  "moduleType": [
+    "node"
+  ],
+  "license": "free",
+  "homepage": "http://tamas.io/",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "app/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "core-ajax": "Polymer/core-ajax#master",
+    "polymer": "Polymer/polymer#master",
+    "polymer-jsonp": "Polymer/polymer-jsonp#master",
+    "polymer-ajax": "Polymer/polymer-ajax#master"
+  }
+}
